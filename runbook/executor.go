@@ -2,6 +2,7 @@ package runbook
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -50,6 +51,7 @@ func Execute(executionId string, executablePath string, args, environmentVars []
 		cmd = exec.Command(command[0], args...)
 	} else {
 		cmd = exec.Command(executablePath, args...)
+		fmt.Println(executablePath, " ", args)
 	}
 
 	cmd.Env = append(os.Environ(), environmentVars...)

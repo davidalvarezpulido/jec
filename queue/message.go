@@ -4,14 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+	"time"
+
 	"github.com/atlassian/jec/conf"
 	"github.com/atlassian/jec/git"
 	"github.com/atlassian/jec/runbook"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"io"
-	"time"
 )
 
 type MessageHandler interface {
@@ -134,8 +137,30 @@ func (mh *messageHandler) execute(mappedAction *conf.MappedAction, message *sqs.
 		fallthrough
 
 	case conf.LocalSourceType:
+		/*
+
+			Modificacion se escribe un fichero de payload
+
+		*/
+
+		tempDir := "/var/tmp/jec/"
+		tempFile, err := ioutil.TempFile(tempDir, "payload")
+		if err != nil {
+			logrus.Error("Error creating temporal file", err)
+			os.Exit(1)
+		}
+
+		//defer os.Remove(tempFile.Name())
+
+		_, err = tempFile.WriteString(*message.Body)
+		if err != nil {
+			logrus.Error("Error writing temporal file", err)
+			os.Exit(1)
+		}
+
 		args := append(mh.actionSpecs.GlobalFlags.Args(), mappedAction.Flags.Args()...)
-		args = append(args, []string{"-payload", *message.Body}...)
+		//args = append(args, []string{"-payload", *message.Body}...)
+		args = append(args, []string{"-payload", tempFile.Name()}...)
 		args = append(args, mh.actionSpecs.GlobalArgs...)
 		args = append(args, mappedAction.Args...)
 		env := append(mh.actionSpecs.GlobalEnv, mappedAction.Env...)
