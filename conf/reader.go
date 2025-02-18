@@ -1,12 +1,13 @@
 package conf
 
 import (
-	"github.com/atlassian/jec/git"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/atlassian/jec/git"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -39,7 +40,7 @@ func Read() (*Configuration, error) {
 	}
 
 	addHomeDirPrefixToActionMappings(conf.ActionMappings)
-	chmodLocalActions(conf.ActionMappings, 0700)
+	//chmodLocalActions(conf.ActionMappings, 0700)
 
 	conf.addDefaultFlags()
 
